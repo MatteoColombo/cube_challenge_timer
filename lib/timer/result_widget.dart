@@ -1,10 +1,12 @@
 import 'package:cube_challenge_timer/enum/popup_menu.dart';
+import 'package:cube_challenge_timer/model/util_class.dart';
 import 'package:flutter/material.dart';
 
 class ResultWidget extends StatelessWidget {
-  ResultWidget(this._p0, this._p1, this._callback);
+  ResultWidget(this._p0, this._p1, this._callback, this._utils);
   final int _p0;
   final int _p1;
+  final UtilClass _utils;
   //final bool showTime;
   final Function _callback;
 
@@ -41,14 +43,14 @@ class ResultWidget extends StatelessWidget {
                     child: Text("Reset"),
                     value: PopUpOptions.Reset,
                   ),
-          PopupMenuItem(
+                  PopupMenuItem(
                     child: Text("Select Puzzle"),
                     value: PopUpOptions.SelectPuzzle,
                   ),
-                     /*     PopupMenuItem(
-                    child: Text("Hide time"),
-                    value: PopUpOptions.HideTime,
-                  ),*/
+                  PopupMenuItem(
+                    child: Text(_utils.showTime ? "Hide time" : "Show Time"),
+                    value: PopUpOptions.ShowTime,
+                  ),
                 ],
           ),
           Expanded(

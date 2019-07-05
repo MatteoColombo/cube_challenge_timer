@@ -1,4 +1,8 @@
+import 'package:cube_challenge_timer/enum/penalty.dart';
 import 'package:cube_challenge_timer/enum/popup_menu.dart';
+import 'package:cube_challenge_timer/enum/timer_state.dart';
+import 'package:cube_challenge_timer/model/player_status.dart';
+import 'package:cube_challenge_timer/model/util_class.dart';
 import 'package:cube_challenge_timer/scrambler/scrambler.dart';
 import 'package:cube_challenge_timer/timer/puzzle_selector.dart';
 import 'package:cube_challenge_timer/timer/result_widget.dart';
@@ -12,45 +16,23 @@ class CubeChallengeTimer extends StatefulWidget {
 }
 
 class CubeChallengeState extends State<CubeChallengeTimer> {
-  CubeChallengeState()
-      : p0Ready = false,
-        p1Ready = false,
-        p0Timing = false,
-        p1Timing = false,
-        p0Finished = true,
-        p1Finished = true,
-        canStart = false,
-        p0Points = 0,
-        p1Points = 0,
-        p0Time = 21345,
-        p1Time = 18376 {
+  CubeChallengeState() {
     _scrambler = Scrambler();
+    _utils = UtilClass();
     _getNewScramble();
-    p0TimerKey = GlobalKey();
-    p1TimerKey = GlobalKey();
     _loadSP();
+    _p0 = PlayerStatus(0);
+    _p1 = PlayerStatus(1);
   }
 
-  String _scramble;
+  UtilClass _utils;
+
   Scrambler _scrambler;
   String _puzzleId;
+  int _winner;
 
-  int p0Points;
-  int p1Points;
-  int p0Time;
-  int p1Time;
-  int winner;
-
-  bool p0Ready;
-  bool p1Ready;
-  bool p0Timing;
-  bool p1Timing;
-  bool p0Finished;
-  bool p1Finished;
-  bool canStart;
-
-  GlobalKey<UserTimerState> p0TimerKey;
-  GlobalKey<UserTimerState> p1TimerKey;
+  PlayerStatus _p0;
+  PlayerStatus _p1;
 
   @override
   Widget build(BuildContext context) {
@@ -58,17 +40,15 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
       child: Scaffold(
         body: Column(
           children: <Widget>[
-            UserTimer(p1TimerKey, 1, _scramble, _playerReady, _playerNotReady,
-                _playerTiming, _playerFinished, _updateTime),
+            UserTimer(_p1, _utils, _playerTimerCallback, _updateTime),
             Divider(
               height: 1,
             ),
-            ResultWidget(p0Points, p1Points, _settingsCallback),
+            ResultWidget(_p0.points, _p1.points, _settingsCallback, _utils),
             Divider(
               height: 1,
             ),
-            UserTimer(p0TimerKey, 0, _scramble, _playerReady, _playerNotReady,
-                _playerTiming, _playerFinished, _updateTime),
+            UserTimer(_p0, _utils, _playerTimerCallback, _updateTime),
           ],
         ),
       ),
@@ -79,8 +59,11 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _puzzleId = prefs.getString("puzzleId") ?? "333";
-      p0Points = prefs.getInt("p0") ?? 0;
-      p1Points = prefs.getInt("p1") ?? 0;
+      _utils.showTime = prefs.getBool("showTimerUpdate") ?? true;
+      _utils.scrambleSize = prefs.getDouble("scrambleSize") ?? 24;
+      _utils.timeSize = prefs.getDouble("timeSize") ?? 48;
+      _p0.points = prefs.getInt("p0") ?? 0;
+      _p1.points = prefs.getInt("p1") ?? 0;
     });
   }
 
@@ -92,113 +75,90 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
           context: context, builder: (context) => PuzzleSelector(_puzzleId));
       if (res != null && res != _puzzleId) {
         _puzzleId = res;
-        _savePuzzle();
         await _scrambler.changePuzzle(_puzzleId);
         _resetAll();
       }
+    } else if (choice == PopUpOptions.ShowTime) {
+      _utils.invertShowTime();
     }
-  }
-
-  _savePuzzle() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString('puzzleId', _puzzleId);
   }
 
   _resetAll() {
+    _getNewScramble();
     setState(() {
-      _scramble=null;
-      _getNewScramble();
-      p0Points = 0;
-      p1Points = 0;
-      p0Time = 0;
-      p1Time = 0;
-      p0TimerKey.currentState.reset();
-      p1TimerKey.currentState.reset();
-      _savePoints();
+      _utils.scramble = null;
+      _p0.reset();
+      _p1.reset();
     });
   }
 
-  _savePoints() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setInt('p0', p0Points);
-    prefs.setInt('p1', p1Points);
+  _playerTimerCallback(TimerState state) {
+    if (state == TimerState.Ready)
+      _playerReady();
+    else if (state == TimerState.Timing)
+      _playerTiming();
+    else if (state == TimerState.Finished) _playerFinished();
   }
 
-  _playerReady(int uid) {
-    if (uid == 0) p0Ready = true;
-    if (uid == 1) p1Ready = true;
-
-    if (p0Ready && p1Ready && !canStart) {
-      canStart = true;
-      _allowStart();
-      p0Finished = false;
-      p1Finished = false;
+  _playerReady() {
+    if (_p0.readyToStart && _p1.readyToStart) {
+      _p0.allowToStart();
+      _p1.allowToStart();
     }
   }
 
-  _playerNotReady(int uid) {
-    if (uid == 0) p0Ready = false;
-    if (uid == 1) p1Ready = false;
-  }
-
-  _playerTiming(int uid) {
-    if (uid == 0) p0Timing = true;
-    if (uid == 1) p1Timing = true;
-    if (p0Timing && p1Timing) {
-      p0Ready = false;
-      p1Ready = false;
+  _playerTiming() {
+    if (_p0.isTiming && _p1.isTiming) {
+      _p0.setNotReady();
+      _p1.setNotReady();
     }
   }
 
-  _playerFinished(int time, int uid) {
-    if (uid == 0) {
-      p0Finished = true;
-      p0Timing = false;
-      p0Time = time;
-    }
-    if (uid == 1) {
-      p1Finished = true;
-      p1Timing = false;
-      p1Time = time;
-    }
-    if (p0Finished && p1Finished) {
-      canStart = false;
+  _playerFinished() {
+    if (_p0.hasFinished && _p1.hasFinished) {
+      _p0.canNotStart();
+      _p1.canNotStart();
+      _utils.scramble = null;
       _getNewScramble();
       _computeWinner();
     }
   }
 
   _computeWinner() {
-    final t0 = p0Time >= 0 ? p0Time ~/ 10 : -1;
-    final t1 = p1Time >= 0 ? p1Time ~/ 10 : -1;
+    final p0 = _p0.penalty;
+    final p1 = _p1.penalty;
+    final t0 = (p0 == Penalty.OK
+        ? _p0.time ~/ 10
+        : (p0 == Penalty.PLUSTWO ? (_p0.time + 2000) ~/ 10 : -1));
+
+    final t1 = (p1 == Penalty.OK
+        ? _p1.time ~/ 10
+        : (p1 == Penalty.PLUSTWO ? (_p1.time + 2000) ~/ 10 : -1));
+
     setState(() {
-      if ((t0 < t1 && t0 > 0) || (t1 == -1 && t0 > 0)) {
-        winner = 0;
-        p0Points++;
-        _savePoints();
-      } else if ((t1 < t0 && t1 > 0) || (t0 == -1 && t1 > 0)) {
-        winner = 1;
-        p1Points++;
-        _savePoints();
+      if ((t0 < t1 && p0 != Penalty.DNF) || (p1 == Penalty.DNF && t0 > 0)) {
+        _winner = 0;
+        _p0.points = 1;
+      } else if ((t1 < t0 && p1 != Penalty.DNF) ||
+          (p0 == Penalty.DNF && t1 > 0)) {
+        _winner = 1;
+        _p1.points = 1;
       } else if (t1 == t0) {
-        winner = -1;
-        p0Points++;
-        p1Points++;
-        _savePoints();
+        _winner = -1;
+        _p0.points = 1;
+        _p1.points = 1;
       }
     });
   }
 
-  _updateTime(int time, int uid) {
-    if (uid == 0) p0Time = time;
-    if (uid == 1) p1Time = time;
-    if (winner == 0)
-      p0Points--;
-    else if (winner == 1)
-      p1Points--;
-    else if (winner == -1) {
-      p0Points--;
-      p1Points--;
+  _updateTime() {
+    if (_winner == 0)
+      _p0.points = -1;
+    else if (_winner == 1)
+      _p1.points = -1;
+    else if (_winner == -1) {
+      _p0.points = -1;
+      _p1.points = -1;
     }
     _computeWinner();
   }
@@ -206,12 +166,7 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
   _getNewScramble() async {
     String scramble = await _scrambler.getScramble();
     setState(() {
-      _scramble = scramble;
+      _utils.scramble = scramble;
     });
-  }
-
-  _allowStart() {
-    p0TimerKey.currentState.allowStart();
-    p1TimerKey.currentState.allowStart();
   }
 }

@@ -1,12 +1,12 @@
 import 'package:cube_challenge_timer/enum/penalty.dart';
+import 'package:cube_challenge_timer/model/player_status.dart';
 import 'package:flutter/material.dart';
 
 class PenaltyWidget extends StatelessWidget {
-  PenaltyWidget(this._callback, this._enabled, this._penalty);
+  PenaltyWidget(this._callback, this._playerStatus);
 
   final Function _callback;
-  final bool _enabled;
-  final Penalty _penalty;
+  final PlayerStatus _playerStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -16,19 +16,22 @@ class PenaltyWidget extends StatelessWidget {
       children: <Widget>[
         FlatButton(
           child: Text("OK"),
-          onPressed: (_enabled && (_penalty != Penalty.OK))
+          onPressed: (_playerStatus.notReadyTimingCanStart &&
+                  (_playerStatus.penalty != Penalty.OK))
               ? () => _callback(Penalty.OK)
               : null,
         ),
         FlatButton(
           child: Text("+2"),
-          onPressed: (_enabled && (_penalty != Penalty.PLUSTWO))
+          onPressed: (_playerStatus.notReadyTimingCanStart &&
+                  (_playerStatus.penalty != Penalty.PLUSTWO))
               ? () => _callback(Penalty.PLUSTWO)
               : null,
         ),
         FlatButton(
           child: Text("DNF"),
-          onPressed: (_enabled && (_penalty != Penalty.DNF))
+          onPressed: (_playerStatus.notReadyTimingCanStart &&
+                  (_playerStatus.penalty != Penalty.DNF))
               ? () => _callback(Penalty.DNF)
               : null,
         ),

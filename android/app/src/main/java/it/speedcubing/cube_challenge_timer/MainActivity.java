@@ -12,27 +12,18 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 
 import net.gnehzr.tnoodle.scrambles.Puzzle;
-import net.gnehzr.tnoodle.scrambles.PuzzlePlugins;
+import net.gnehzr.tnoodle.scrambles.ScrambleCacher;
 
 import puzzle.*;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import android.os.AsyncTask;
 import android.util.Log;
 
-import net.gnehzr.tnoodle.utils.BadLazyClassDescriptionException;
-import net.gnehzr.tnoodle.utils.LazyInstantiator;
-import net.gnehzr.tnoodle.utils.LazyInstantiatorException;
-
 public class MainActivity extends FlutterActivity {
     private static final String CHANNEL = "it.speedcubing.cube_challenge_timer/scramble";
     private Puzzle puzzle;
-    private ArrayList<String> scrambleCache;
-    private SharedPreferences preferences;
+    private ScrambleCacher cache;
     private static final String TYPE_222 = "222";
     private static final String TYPE_333 = "333";
     private static final String TYPE_444 = "444";
@@ -45,16 +36,16 @@ public class MainActivity extends FlutterActivity {
     private static final String TYPE_CLOCK = "clock";
     private static final String TYPE_SQ1 = "sq1";
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         GeneratedPluginRegistrant.registerWith(this);
-        preferences = this.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE);
+
+        SharedPreferences preferences = this.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE);
         String puzzleId = preferences.getString("flutter.puzzleId", "333");
+
         puzzle = getScrambleGenerator(puzzleId);
-        resetCache();
-        new GenerateCache().execute();
+        cache = new ScrambleCacher(puzzle, 4, false);
 
 
         new MethodChannel(getFlutterView(), CHANNEL).setMethodCallHandler(new MethodCallHandler() {
@@ -62,18 +53,10 @@ public class MainActivity extends FlutterActivity {
             public void onMethodCall(MethodCall call, Result result) {
 
                 if (call.method.equals("scramble")) {
-                    if (scrambleCache.size() == 0) {
-                        new GenerateScramble().execute(result);
-                    } else {
-                        String scramble = scrambleCache.remove(0);
-                        new GenerateCache().execute();
-                        result.success(scramble);
-                    }
-
+                    new GenerateScrambleAndReturn().execute(result);
                 } else if (call.method.equals("changePuzzle")) {
                     puzzle = getScrambleGenerator(call.argument("puzzleId"));
-                    resetCache();
-                    new GenerateCache().execute();
+                    cache = new ScrambleCacher(puzzle, 4, false);
                     result.success(true);
                 } else {
                     result.notImplemented();
@@ -83,39 +66,23 @@ public class MainActivity extends FlutterActivity {
     }
 
 
-    private class GenerateCache extends AsyncTask<Void, Void, Void> {
+    private class GenerateScrambleAndReturn extends AsyncTask<Result, Void, String> {
+        Result result;
 
         @Override
-        protected Void doInBackground(Void... r) {
+        protected String doInBackground(Result... r) {
+            result = r[0];
             try {
-                while (scrambleCache.size() < 3) {
-                    scrambleCache.add(puzzle.generateScramble());
-                }
+                return cache.newScramble();
             } catch (Exception e) {
+                return "An error occured";
             }
-            return null;
         }
-
-
-    }
-
-    private class GenerateScramble extends AsyncTask<Result, Void, Void> {
 
         @Override
-        protected Void doInBackground(Result... r) {
-            try {
-                String scramble = puzzle.generateScramble();
-                r[0].success(scramble);
-            } catch (Exception e) {
-            }
-            return null;
+        protected void onPostExecute(String s) {
+            result.success(s);
         }
-
-    }
-
-
-    private void resetCache() {
-        scrambleCache = new ArrayList<String>();
     }
 
 
