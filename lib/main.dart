@@ -1,5 +1,4 @@
 import 'package:cube_challenge_timer/timer/cube_challenge.dart';
-import 'package:cube_challenge_timer/timer/user_timer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

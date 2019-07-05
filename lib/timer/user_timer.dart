@@ -79,7 +79,7 @@ class UserTimerState extends State<UserTimer> {
             padding: EdgeInsets.all(8),
             color: _canStart
                 ? Colors.green
-                : _ready ? Colors.yellow : Colors.transparent,
+                : _ready ? Colors.yellow[800] : Colors.transparent,
             child: Column(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -1,5 +1,6 @@
 import 'package:cube_challenge_timer/enum/popup_menu.dart';
 import 'package:cube_challenge_timer/scrambler/scrambler.dart';
+import 'package:cube_challenge_timer/timer/puzzle_selector.dart';
 import 'package:cube_challenge_timer/timer/result_widget.dart';
 import 'package:cube_challenge_timer/timer/user_timer.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,7 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
 
   String _scramble;
   Scrambler _scrambler;
+  String _puzzleId;
 
   int p0Points;
   int p1Points;
@@ -58,9 +60,13 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
           children: <Widget>[
             UserTimer(p1TimerKey, 1, _scramble, _playerReady, _playerNotReady,
                 _playerTiming, _playerFinished, _updateTime),
-            Divider(height: 1,),
+            Divider(
+              height: 1,
+            ),
             ResultWidget(p0Points, p1Points, _settingsCallback),
-            Divider(height: 1,),
+            Divider(
+              height: 1,
+            ),
             UserTimer(p0TimerKey, 0, _scramble, _playerReady, _playerNotReady,
                 _playerTiming, _playerFinished, _updateTime),
           ],
@@ -72,25 +78,44 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
   _loadSP() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
+      _puzzleId = prefs.getString("puzzleId") ?? "333";
       p0Points = prefs.getInt("p0") ?? 0;
       p1Points = prefs.getInt("p1") ?? 0;
     });
   }
 
-  _settingsCallback(PopUpOptions choice) {
+  _settingsCallback(PopUpOptions choice) async {
     if (choice == PopUpOptions.Reset) {
-      setState(() {
-        _getNewScramble();
-        p0Points = 0;
-        p1Points = 0;
-        p0Time = 0;
-        p1Time = 0;
-        p0TimerKey.currentState.reset();
-        p1TimerKey.currentState.reset();
-        _savePoints();
-      });
-    } else if (choice == PopUpOptions.ShowTime ||
-        choice == PopUpOptions.HideTime) {}
+      _resetAll();
+    } else if (choice == PopUpOptions.SelectPuzzle) {
+      var res = await showDialog(
+          context: context, builder: (context) => PuzzleSelector(_puzzleId));
+      if (res != null && res != _puzzleId) {
+        _puzzleId = res;
+        _savePuzzle();
+        await _scrambler.changePuzzle(_puzzleId);
+        _resetAll();
+      }
+    }
+  }
+
+  _savePuzzle() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('puzzleId', _puzzleId);
+  }
+
+  _resetAll() {
+    setState(() {
+      _scramble=null;
+      _getNewScramble();
+      p0Points = 0;
+      p1Points = 0;
+      p0Time = 0;
+      p1Time = 0;
+      p0TimerKey.currentState.reset();
+      p1TimerKey.currentState.reset();
+      _savePoints();
+    });
   }
 
   _savePoints() async {

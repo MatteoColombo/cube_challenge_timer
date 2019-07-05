@@ -11,7 +11,7 @@ class ScrambleWidget extends StatelessWidget {
     return Text(_scramble == null ? "Generating scramble" : _scramble,
         textAlign: TextAlign.center,
         style: TextStyle(
-          fontSize: 24,
+          fontSize: 16,
           color: _timing ? Colors.white30 : Colors.white,
         ));
   }

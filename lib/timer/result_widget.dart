@@ -41,11 +41,11 @@ class ResultWidget extends StatelessWidget {
                     child: Text("Reset"),
                     value: PopUpOptions.Reset,
                   ),
-     /*             PopupMenuItem(
-                    child: Text("Show time"),
-                    value: PopUpOptions.ShowTime,
+          PopupMenuItem(
+                    child: Text("Select Puzzle"),
+                    value: PopUpOptions.SelectPuzzle,
                   ),
-                  PopupMenuItem(
+                     /*     PopupMenuItem(
                     child: Text("Hide time"),
                     value: PopUpOptions.HideTime,
                   ),*/
