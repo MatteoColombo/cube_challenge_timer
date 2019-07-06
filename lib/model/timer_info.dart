@@ -14,8 +14,12 @@ class TimerInfo {
   double scrambleSize = 24;
   double timeSize = 48;
 
-  invertShowTime() async {
-    showTime = !showTime;
+  set setShowTime(bool value) {
+    showTime = value;
+    _savePreference();
+  }
+
+  _savePreference() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setBool("showTimerUpdate", showTime);
   }

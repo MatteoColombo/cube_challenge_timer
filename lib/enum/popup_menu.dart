@@ -1,1 +1,1 @@
-enum PopUpOptions { Reset, SelectPuzzle, ShowTime, HideTime }
+enum PopUpOptions { Reset, SelectPuzzle, HideTime, ShowTime,  DeleteLast, AmoledBlack, DefaultTheme }

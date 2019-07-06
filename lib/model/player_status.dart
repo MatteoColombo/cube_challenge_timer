@@ -77,6 +77,11 @@ class PlayerStatus {
     _savePoints();
   }
 
+  deleteLast() {
+    time = 0;
+    penalty = Penalty.OK;
+  }
+
   void allowToStart() {
     key.currentState.allowToStart();
   }

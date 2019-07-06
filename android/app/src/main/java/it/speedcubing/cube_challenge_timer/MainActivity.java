@@ -19,10 +19,11 @@ import puzzle.*;
 
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.WindowManager;
+
 
 public class MainActivity extends FlutterActivity {
     private static final String CHANNEL = "it.speedcubing.cube_challenge_timer/scramble";
-    private Puzzle puzzle;
     private ScrambleCacher cache;
     private static final String TYPE_222 = "222";
     private static final String TYPE_333 = "333";
@@ -40,13 +41,13 @@ public class MainActivity extends FlutterActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         GeneratedPluginRegistrant.registerWith(this);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         SharedPreferences preferences = this.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE);
         String puzzleId = preferences.getString("flutter.puzzleId", "333");
 
-        puzzle = getScrambleGenerator(puzzleId);
+        Puzzle puzzle = getScrambleGenerator(puzzleId);
         cache = new ScrambleCacher(puzzle, 4, false);
-
 
         new MethodChannel(getFlutterView(), CHANNEL).setMethodCallHandler(new MethodCallHandler() {
             @Override
@@ -55,7 +56,7 @@ public class MainActivity extends FlutterActivity {
                 if (call.method.equals("scramble")) {
                     new GenerateScrambleAndReturn().execute(result);
                 } else if (call.method.equals("changePuzzle")) {
-                    puzzle = getScrambleGenerator(call.argument("puzzleId"));
+                    Puzzle puzzle = getScrambleGenerator(call.argument("puzzleId"));
                     cache = new ScrambleCacher(puzzle, 4, false);
                     result.success(true);
                 } else {

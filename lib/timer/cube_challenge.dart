@@ -23,6 +23,7 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
     _loadSP();
     _p0 = PlayerStatus(0);
     _p1 = PlayerStatus(1);
+    _winner = -2;
   }
 
   TimerInfo _info;
@@ -34,30 +35,35 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
   PlayerStatus _p0;
   PlayerStatus _p1;
 
+  bool _amoledBlack;
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Scaffold(
-        body: Column(
-          children: <Widget>[
-            UserTimer(status: _p1,info: _info, callback: _playerTimerCallback),
-            Divider(
-              height: 1,
-            ),
-            ResultWidget(
-              p0: _p0.points,
-              p1: _p1.points,
-              showTime: _info.showTime,
-              callback: _settingsCallback,
-            ),
-            Divider(
-              height: 1,
-            ),
-            UserTimer(status: _p0,info: _info, callback: _playerTimerCallback),
-          ],
-        ),
+        child: Scaffold(
+      backgroundColor: _amoledBlack ?? false ? Colors.black : null,
+      body: Column(
+        children: <Widget>[
+          UserTimer(status: _p1, info: _info, callback: _playerTimerCallback),
+          Divider(
+            height: 1,
+          ),
+          ResultWidget(
+            p0: _p0.points,
+            p1: _p1.points,
+            deleteLast: _p0.time != 0 && _p1.time != 0,
+            showTime: _info.showTime,
+            winner: _winner,
+            amoledBlack: _amoledBlack,
+            callback: _settingsCallback,
+          ),
+          Divider(
+            height: 1,
+          ),
+          UserTimer(status: _p0, info: _info, callback: _playerTimerCallback),
+        ],
       ),
-    );
+    ));
   }
 
   _loadSP() async {
@@ -67,27 +73,64 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
       _info.showTime = prefs.getBool("showTimerUpdate") ?? true;
       _info.scrambleSize = prefs.getDouble("scrambleSize") ?? 24;
       _info.timeSize = prefs.getDouble("timeSize") ?? 48;
+      _amoledBlack = prefs.getBool("amoledBlack") ?? false;
       _p0.points = prefs.getInt("p0") ?? 0;
       _p1.points = prefs.getInt("p1") ?? 0;
     });
   }
 
   _settingsCallback(PopUpOptions choice) async {
-    if (choice == PopUpOptions.Reset) {
-      _resetAll();
-    } else if (choice == PopUpOptions.SelectPuzzle) {
-      var res = await showDialog(
-          context: context,
-          builder: (context) => PuzzleSelector(
-                puzzle: _puzzleId,
-              ));
-      if (res != null && res != _puzzleId) {
-        _puzzleId = res;
-        await _scrambler.changePuzzle(_puzzleId);
+    switch (choice) {
+      case PopUpOptions.Reset:
         _resetAll();
-      }
-    } else if (choice == PopUpOptions.ShowTime) {
-      _info.invertShowTime();
+        break;
+      case PopUpOptions.SelectPuzzle:
+        _changePuzzle();
+        break;
+      case PopUpOptions.HideTime:
+        _info.setShowTime = false;
+        break;
+      case PopUpOptions.ShowTime:
+        _info.setShowTime = true;
+        break;
+      case PopUpOptions.DeleteLast:
+        _deleteLast();
+        break;
+      case PopUpOptions.AmoledBlack:
+        _saveTheme(true);
+        break;
+      case PopUpOptions.DefaultTheme:
+        _saveTheme(false);
+        break;
+    }
+  }
+
+  _saveTheme(bool val) async {
+    setState(() {
+      _amoledBlack = val;
+    });
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool("amoledBlack", _amoledBlack);
+  }
+
+  _deleteLast() {
+    setState(() {
+      _removeLastWinner();
+      _p0.deleteLast();
+      _p1.deleteLast();
+    });
+  }
+
+  _changePuzzle() async {
+    var res = await showDialog(
+        context: context,
+        builder: (context) => PuzzleSelector(
+              puzzle: _puzzleId,
+            ));
+    if (res != null && res != _puzzleId) {
+      _puzzleId = res;
+      await _scrambler.changePuzzle(_puzzleId);
+      _resetAll();
     }
   }
 
@@ -95,19 +138,28 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
     _getNewScramble();
     setState(() {
       _info.scramble = null;
+      _winner = -2;
       _p0.reset();
       _p1.reset();
     });
   }
 
   _playerTimerCallback(TimerState state) {
-    if (state == TimerState.Ready)
-      _playerReady();
-    else if (state == TimerState.Timing)
-      _playerTiming();
-    else if (state == TimerState.Finished)
-      _playerFinished();
-    else if (state == TimerState.Updated) _updateTime();
+    switch (state) {
+      case TimerState.Ready:
+        _playerReady();
+        break;
+      case TimerState.Timing:
+        _playerTiming();
+        break;
+      case TimerState.Finished:
+        _playerFinished();
+        break;
+      case TimerState.Updated:
+        _updateTime();
+        break;
+      default:
+    }
   }
 
   _playerReady() {
@@ -162,6 +214,11 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
   }
 
   _updateTime() {
+    _removeLastWinner();
+    _computeWinner();
+  }
+
+  _removeLastWinner() {
     if (_winner == 0)
       _p0.points = -1;
     else if (_winner == 1)
@@ -170,7 +227,7 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
       _p0.points = -1;
       _p1.points = -1;
     }
-    _computeWinner();
+    _winner = -2;
   }
 
   _getNewScramble() async {

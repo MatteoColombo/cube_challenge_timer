@@ -16,8 +16,7 @@ class UserTimer extends StatefulWidget {
   final TimerInfo info;
   final Function callback;
 
-  UserTimerState createState() =>
-      UserTimerState(status, info, callback);
+  UserTimerState createState() => UserTimerState(status, info, callback);
 }
 
 class UserTimerState extends State<UserTimer> {
@@ -29,8 +28,11 @@ class UserTimerState extends State<UserTimer> {
   int _end;
   int _runningTime;
 
+  bool _parent;
+
   UserTimerState(this._status, this._info, this._timerStateCallback)
-      : _runningTime = 0;
+      : _runningTime = 0,
+        _parent = true;
 
   @override
   Widget build(BuildContext context) {
@@ -63,10 +65,16 @@ class UserTimerState extends State<UserTimer> {
                   timeSize: _info.timeSize,
                   showTime: _info.showTime,
                 ),
-                PenaltyWidget(
-                  enabled: _status.notTimingCanStart,
-                  penalty: _status.penalty,
-                  callback: _penaltyCallback,
+                Listener(
+                  onPointerDown: _status.notTimingCanStart
+                      ? (details) => _parent = false
+                      : null,
+                  onPointerUp: (details) => _parent = true,
+                  child: PenaltyWidget(
+                    enabled: _status.notTimingCanStart,
+                    penalty: _status.penalty,
+                    callback: _penaltyCallback,
+                  ),
                 )
               ],
             ),
@@ -100,6 +108,7 @@ class UserTimerState extends State<UserTimer> {
   }
 
   _handleTapDown() {
+    if(_parent){
     if (_info.scramble != null) {
       if (_status.isTiming) {
         _end = DateTime.now().millisecondsSinceEpoch;
@@ -115,6 +124,7 @@ class UserTimerState extends State<UserTimer> {
           _timerStateCallback(TimerState.Ready);
         });
       }
+    }
     }
   }
 

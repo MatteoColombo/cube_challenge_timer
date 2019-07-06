@@ -19,9 +19,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  screen: ^0.0.5
   shared_preferences: ^0.5.3+1
   progress_indicators: ^0.1.2
+  material_design_icons_flutter: ^3.2.3695
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

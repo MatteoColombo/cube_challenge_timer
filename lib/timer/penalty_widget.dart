@@ -15,11 +15,11 @@ class PenaltyWidget extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
         FlatButton(
-            child: Text("OK"),
-            onPressed: (enabled && penalty != Penalty.OK)
-                ? () => callback(Penalty.OK)
-                : null,
-          ),
+          child: Text("OK"),
+          onPressed: (enabled && penalty != Penalty.OK)
+              ? () => callback(Penalty.OK)
+              : null,
+        ),
         FlatButton(
           child: Text("+2"),
           onPressed: (enabled && penalty != Penalty.PLUSTWO)
