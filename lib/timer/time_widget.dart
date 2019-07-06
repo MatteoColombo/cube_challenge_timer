@@ -1,38 +1,38 @@
 import 'package:cube_challenge_timer/enum/penalty.dart';
-import 'package:cube_challenge_timer/model/util_class.dart';
 import 'package:flutter/material.dart';
 import 'package:cube_challenge_timer/util/timeformatter.dart';
 
 class TimeWidget extends StatelessWidget {
-  TimeWidget(this._time, this._penalty, this._timing, this._utils);
+  TimeWidget(
+      {@required this.time,
+      @required this.penalty,
+      @required this.timing,
+      this.timeSize,
+      this.showTime});
 
-  /*
-    time == 0 => ready
-    time > 0 => timing/there is a time
-  */
-  final int _time;
-  final Penalty _penalty;
-  final bool _timing;
-  final UtilClass _utils;
-
+  final int time;
+  final Penalty penalty;
+  final bool timing;
+  final double timeSize;
+  final bool showTime;
   @override
   Widget build(BuildContext context) {
     String timeString = _generateText();
     return Text(
       timeString,
-      style: TextStyle(fontSize: _utils.timeSize),
+      style: TextStyle(fontSize: timeSize ?? 48),
     );
   }
 
   String _generateText() {
-    if (_timing) {
-      if (_utils.showTime) return "${formatTime(_time)}";
+    if (timing) {
+      if (showTime || true) return "${formatTime(time)}";
       return "Timing";
     } else {
-      if (_time == 0) return "Ready";
-      if (_penalty == Penalty.DNF) return "DNF";
-      if (_penalty == Penalty.PLUSTWO) return "${formatTime(_time + 2000)}+";
-      return "${formatTime(_time)}";
+      if (time == 0) return "Ready";
+      if (penalty == Penalty.DNF) return "DNF";
+      if (penalty == Penalty.PLUSTWO) return "${formatTime(time + 2000)}+";
+      return "${formatTime(time)}";
     }
   }
 }

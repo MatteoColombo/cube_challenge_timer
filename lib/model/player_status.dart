@@ -41,7 +41,7 @@ class PlayerStatus {
 
   bool get readyToStart => isReady && !canStart;
 
-  bool get notReadyTimingCanStart => !isReady && !canStart && !isTiming && time >0;
+  bool get notTimingCanStart => !canStart && !isTiming && time != 0;
 
   void setNotReady() => isReady = false;
 

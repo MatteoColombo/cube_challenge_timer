@@ -1,7 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-class UtilClass {
-  UtilClass(
+class TimerInfo {
+  TimerInfo(
       {this.scramble,
       this.puzzleId,
       this.scrambleSize,

@@ -2,7 +2,7 @@ import 'package:cube_challenge_timer/enum/penalty.dart';
 import 'package:cube_challenge_timer/enum/popup_menu.dart';
 import 'package:cube_challenge_timer/enum/timer_state.dart';
 import 'package:cube_challenge_timer/model/player_status.dart';
-import 'package:cube_challenge_timer/model/util_class.dart';
+import 'package:cube_challenge_timer/model/timer_info.dart';
 import 'package:cube_challenge_timer/scrambler/scrambler.dart';
 import 'package:cube_challenge_timer/timer/puzzle_selector.dart';
 import 'package:cube_challenge_timer/timer/result_widget.dart';
@@ -18,14 +18,14 @@ class CubeChallengeTimer extends StatefulWidget {
 class CubeChallengeState extends State<CubeChallengeTimer> {
   CubeChallengeState() {
     _scrambler = Scrambler();
-    _utils = UtilClass();
+    _info = TimerInfo();
     _getNewScramble();
     _loadSP();
     _p0 = PlayerStatus(0);
     _p1 = PlayerStatus(1);
   }
 
-  UtilClass _utils;
+  TimerInfo _info;
 
   Scrambler _scrambler;
   String _puzzleId;
@@ -40,15 +40,20 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
       child: Scaffold(
         body: Column(
           children: <Widget>[
-            UserTimer(_p1, _utils, _playerTimerCallback, _updateTime),
+            UserTimer(status: _p1,info: _info, callback: _playerTimerCallback),
             Divider(
               height: 1,
             ),
-            ResultWidget(_p0.points, _p1.points, _settingsCallback, _utils),
+            ResultWidget(
+              p0: _p0.points,
+              p1: _p1.points,
+              showTime: _info.showTime,
+              callback: _settingsCallback,
+            ),
             Divider(
               height: 1,
             ),
-            UserTimer(_p0, _utils, _playerTimerCallback, _updateTime),
+            UserTimer(status: _p0,info: _info, callback: _playerTimerCallback),
           ],
         ),
       ),
@@ -59,9 +64,9 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _puzzleId = prefs.getString("puzzleId") ?? "333";
-      _utils.showTime = prefs.getBool("showTimerUpdate") ?? true;
-      _utils.scrambleSize = prefs.getDouble("scrambleSize") ?? 24;
-      _utils.timeSize = prefs.getDouble("timeSize") ?? 48;
+      _info.showTime = prefs.getBool("showTimerUpdate") ?? true;
+      _info.scrambleSize = prefs.getDouble("scrambleSize") ?? 24;
+      _info.timeSize = prefs.getDouble("timeSize") ?? 48;
       _p0.points = prefs.getInt("p0") ?? 0;
       _p1.points = prefs.getInt("p1") ?? 0;
     });
@@ -72,21 +77,24 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
       _resetAll();
     } else if (choice == PopUpOptions.SelectPuzzle) {
       var res = await showDialog(
-          context: context, builder: (context) => PuzzleSelector(_puzzleId));
+          context: context,
+          builder: (context) => PuzzleSelector(
+                puzzle: _puzzleId,
+              ));
       if (res != null && res != _puzzleId) {
         _puzzleId = res;
         await _scrambler.changePuzzle(_puzzleId);
         _resetAll();
       }
     } else if (choice == PopUpOptions.ShowTime) {
-      _utils.invertShowTime();
+      _info.invertShowTime();
     }
   }
 
   _resetAll() {
     _getNewScramble();
     setState(() {
-      _utils.scramble = null;
+      _info.scramble = null;
       _p0.reset();
       _p1.reset();
     });
@@ -97,7 +105,9 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
       _playerReady();
     else if (state == TimerState.Timing)
       _playerTiming();
-    else if (state == TimerState.Finished) _playerFinished();
+    else if (state == TimerState.Finished)
+      _playerFinished();
+    else if (state == TimerState.Updated) _updateTime();
   }
 
   _playerReady() {
@@ -118,7 +128,7 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
     if (_p0.hasFinished && _p1.hasFinished) {
       _p0.canNotStart();
       _p1.canNotStart();
-      _utils.scramble = null;
+      _info.scramble = null;
       _getNewScramble();
       _computeWinner();
     }
@@ -166,7 +176,7 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
   _getNewScramble() async {
     String scramble = await _scrambler.getScramble();
     setState(() {
-      _utils.scramble = scramble;
+      _info.scramble = scramble;
     });
   }
 }

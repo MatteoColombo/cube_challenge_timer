@@ -1,14 +1,16 @@
 import 'package:cube_challenge_timer/enum/popup_menu.dart';
-import 'package:cube_challenge_timer/model/util_class.dart';
 import 'package:flutter/material.dart';
 
 class ResultWidget extends StatelessWidget {
-  ResultWidget(this._p0, this._p1, this._callback, this._utils);
-  final int _p0;
-  final int _p1;
-  final UtilClass _utils;
-  //final bool showTime;
-  final Function _callback;
+  ResultWidget(
+      {@required this.p0,
+      @required this.p1,
+      @required this.showTime,
+      this.callback});
+  final int p0;
+  final int p1;
+  final bool showTime;
+  final Function callback;
 
   final TextStyle _style =
       const TextStyle(fontSize: 28, fontWeight: FontWeight.bold);
@@ -28,16 +30,16 @@ class ResultWidget extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Text("$_p1",
-                        style: (_p1 > _p0
+                    Text("$p1",
+                        style: (p1 > p0
                             ? _winning
-                            : (_p0 > _p1 ? _losing : _style))),
-                    Text(" - $_p0", style: _style)
+                            : (p0 > p1 ? _losing : _style))),
+                    Text(" - $p0", style: _style)
                   ],
                 )),
           ),
           PopupMenuButton(
-            onSelected: (PopUpOptions choice) => _callback(choice),
+            onSelected: (PopUpOptions choice) => callback(choice),
             itemBuilder: (context) => [
                   PopupMenuItem(
                     child: Text("Reset"),
@@ -48,7 +50,7 @@ class ResultWidget extends StatelessWidget {
                     value: PopUpOptions.SelectPuzzle,
                   ),
                   PopupMenuItem(
-                    child: Text(_utils.showTime ? "Hide time" : "Show Time"),
+                    child: Text(showTime ? "Hide time" : "Show Time"),
                     value: PopUpOptions.ShowTime,
                   ),
                 ],
@@ -59,11 +61,11 @@ class ResultWidget extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Text("$_p0",
-                        style: (_p1 > _p0
+                    Text("$p0",
+                        style: (p1 > p0
                             ? _losing
-                            : (_p0 > _p1 ? _winning : _style))),
-                    Text(" - $_p1", style: _style)
+                            : (p0 > p1 ? _winning : _style))),
+                    Text(" - $p1", style: _style)
                   ],
                 )),
           ),

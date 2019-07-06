@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 class PuzzleSelector extends StatelessWidget {
-  PuzzleSelector(this._selected);
+  PuzzleSelector({@required this.puzzle});
 
-  final String _selected;
+  final String puzzle;
 
-  final Map<String, String> puzzles = {
+  final Map<String, String> puzzles = const {
     "222": "2x2x2 Cube",
     "333": "3x3x3 Cube",
     "444": "4x4x4 Cube",
@@ -28,7 +28,7 @@ class PuzzleSelector extends StatelessWidget {
         itemBuilder: (context, i) {
           return RadioListTile(
             onChanged: (val) => Navigator.pop(context, val),
-            groupValue: _selected,
+            groupValue: puzzle,
             title: Text(puzzles.values.elementAt(i)),
             value: puzzles.keys.elementAt(i),
           );
