@@ -27,7 +27,7 @@ class TimeWidget extends StatelessWidget {
   String _generateText() {
     if (timing) {
       if (showTime) return "${formatTime(time)}";
-      return "Timing";
+      return "SOLVING";
     } else {
       if (time == 0) return "Ready";
       if (penalty == Penalty.DNF) return "DNF";

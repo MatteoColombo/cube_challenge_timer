@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIOverlays([]);
     return MaterialApp(
-      title: 'Cube Challenge',
+      title: '1vs1 Cube Timer',
       theme: ThemeData(
         brightness: Brightness.dark,
       ),
