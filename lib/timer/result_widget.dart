@@ -32,7 +32,7 @@ class ResultWidget extends StatelessWidget {
     "Show time when solving": PopUpOptions.ShowTime,
     "Hide time when solving": PopUpOptions.HideTime,
     "Reset session": PopUpOptions.Reset,
-    "Amoled Black theme": PopUpOptions.AmoledBlack,
+    "Amoled black theme": PopUpOptions.AmoledBlack,
     "Default black theme": PopUpOptions.DefaultTheme,
   };
 
