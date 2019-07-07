@@ -11,8 +11,9 @@ class TimerInfo {
   String scramble;
   String puzzleId = "333";
   bool showTime = true;
-  double scrambleSize = 24;
-  double timeSize = 48;
+  //At the moment these properties are not used;
+  double scrambleSize;
+  double timeSize;
 
   set setShowTime(bool value) {
     showTime = value;

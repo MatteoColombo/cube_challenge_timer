@@ -39,31 +39,37 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1),
+      child: SafeArea(
         child: Scaffold(
-      backgroundColor: _amoledBlack ?? false ? Colors.black : null,
-      body: Column(
-        children: <Widget>[
-          UserTimer(status: _p1, info: _info, callback: _playerTimerCallback),
-          Divider(
-            height: 1,
+          backgroundColor: _amoledBlack ?? false ? Colors.black : null,
+          body: Column(
+            children: <Widget>[
+              UserTimer(
+                  status: _p1, info: _info, callback: _playerTimerCallback),
+              Divider(
+                height: 1,
+              ),
+              ResultWidget(
+                p0: _p0.points,
+                p1: _p1.points,
+                deleteLast: _p0.time != 0 && _p1.time != 0,
+                showTime: _info.showTime,
+                winner: _winner,
+                amoledBlack: _amoledBlack,
+                callback: _settingsCallback,
+              ),
+              Divider(
+                height: 1,
+              ),
+              UserTimer(
+                  status: _p0, info: _info, callback: _playerTimerCallback),
+            ],
           ),
-          ResultWidget(
-            p0: _p0.points,
-            p1: _p1.points,
-            deleteLast: _p0.time != 0 && _p1.time != 0,
-            showTime: _info.showTime,
-            winner: _winner,
-            amoledBlack: _amoledBlack,
-            callback: _settingsCallback,
-          ),
-          Divider(
-            height: 1,
-          ),
-          UserTimer(status: _p0, info: _info, callback: _playerTimerCallback),
-        ],
+        ),
       ),
-    ));
+    );
   }
 
   _loadSP() async {

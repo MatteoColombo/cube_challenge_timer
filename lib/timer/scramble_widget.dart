@@ -7,6 +7,7 @@ class ScrambleWidget extends StatelessWidget {
 
   final bool timing;
   final String scramble;
+  //At the moment this is unused
   final double scrambleSize;
 
   @override
@@ -16,14 +17,22 @@ class ScrambleWidget extends StatelessWidget {
         "Generating scrambles...",
       );
     }
-    List<String> splitScramble = scramble.split(" ");
+    double fs = _getFontSize(MediaQuery.of(context).size.width);
+    int scLen = scramble.split(" ").length;
     return Text(scramble,
         textAlign: TextAlign.center,
         style: TextStyle(
-          fontSize: splitScramble.length > 59
-              ? (scrambleSize / 100 * 71) ?? 17
-              : scrambleSize ?? 24,
+          fontSize: scLen < 60 ? fs : fs * 80 / 100,
           color: timing ? Colors.white30 : Colors.white,
         ));
+  }
+
+  _getFontSize(double dp) {
+    if (dp >= 700) return 32.0;
+    if (dp >= 600) return 28.0;
+    if (dp > 450) return 24.0;
+    if (dp > 400) return 22.0;
+    if(dp >345) return 18.0;
+    return 16.0;
   }
 }

@@ -13,21 +13,25 @@ class TimeWidget extends StatelessWidget {
   final int time;
   final Penalty penalty;
   final bool timing;
+  //At the moment this is not used
   final double timeSize;
   final bool showTime;
   @override
   Widget build(BuildContext context) {
+
+    double dp = MediaQuery.of(context).size.width;
+
     String timeString = _generateText();
     return Text(
       timeString,
-      style: TextStyle(fontSize: timeSize ?? 48),
+      style: TextStyle(fontSize: dp >= 600? 72 : 48),
     );
   }
 
   String _generateText() {
     if (timing) {
       if (showTime) return "${formatTime(time)}";
-      return "SOLVING";
+      return "Solving";
     } else {
       if (time == 0) return "Ready";
       if (penalty == Penalty.DNF) return "DNF";
