@@ -5,7 +5,7 @@ import 'package:cube_challenge_timer/model/player_status.dart';
 import 'package:cube_challenge_timer/model/timer_info.dart';
 import 'package:cube_challenge_timer/scrambler/scrambler.dart';
 import 'package:cube_challenge_timer/timer/puzzle_selector.dart';
-import 'package:cube_challenge_timer/timer/result_widget.dart';
+import 'package:cube_challenge_timer/timer/middle_bar_widget.dart';
 import 'package:cube_challenge_timer/timer/user_timer.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -51,7 +51,7 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
               Divider(
                 height: 1,
               ),
-              ResultWidget(
+              MiddleBarWidget(
                 p0: _p0.points,
                 p1: _p1.points,
                 deleteLast: _p0.time != 0 && _p1.time != 0,
