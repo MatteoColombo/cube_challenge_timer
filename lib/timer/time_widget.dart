@@ -35,7 +35,7 @@ class TimeWidget extends StatelessWidget {
       return S.of(context).solving;
     } else {
       if (time == 0) return S.of(context).ready;
-      if (penalty == Penalty.DNF) return S.of(context).ready;
+      if (penalty == Penalty.DNF) return S.of(context).dnf;
       if (penalty == Penalty.PLUSTWO) return "${formatTime(time + 2000)}+";
       return "${formatTime(time)}";
     }
