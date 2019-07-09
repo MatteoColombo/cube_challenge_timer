@@ -94,10 +94,14 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
         _changePuzzle();
         break;
       case PopUpOptions.HideTime:
-        _info.setShowTime = false;
+        setState(() {
+          _info.setShowTime = false;
+        });
         break;
       case PopUpOptions.ShowTime:
-        _info.setShowTime = true;
+        setState(() {
+          _info.setShowTime = true;
+        });
         break;
       case PopUpOptions.DeleteLast:
         _deleteLast();

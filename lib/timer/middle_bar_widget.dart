@@ -1,5 +1,6 @@
 import 'package:cube_challenge_timer/enum/popup_menu.dart';
 import 'package:cube_challenge_timer/timer/results_widget.dart';
+import 'package:cube_challenge_timer/timer/settings_dialog.dart';
 import 'package:flutter/material.dart';
 
 class MiddleBarWidget extends StatelessWidget {
@@ -11,6 +12,7 @@ class MiddleBarWidget extends StatelessWidget {
       @required this.winner,
       @required this.amoledBlack,
       this.callback});
+
   final int p0;
   final int p1;
   final bool showTime;
@@ -39,7 +41,10 @@ class MiddleBarWidget extends StatelessWidget {
           winner: winner == 1 || winner == -1,
           rotated: true,
         ),
-        _buildPopUpMenu(),
+        IconButton(
+          icon: Icon(Icons.settings),
+          onPressed: () => _showSettingsDialog(context),
+        ),
         ResultsWidget(
           player: p0,
           opponent: p1,
@@ -50,27 +55,16 @@ class MiddleBarWidget extends StatelessWidget {
     );
   }
 
-  PopupMenuButton<PopUpOptions> _buildPopUpMenu() {
-    return PopupMenuButton<PopUpOptions>(
-        onSelected: (PopUpOptions choice) => callback(choice),
-        icon: Icon(Icons.settings),
-        itemBuilder: (context) {
-          List<PopupMenuEntry<PopUpOptions>> options = [];
-          for (final k in optionsMap.keys) {
-            PopUpOptions opt = optionsMap[k];
-            if (opt == PopUpOptions.ShowTime && showTime)
-              continue;
-            else if (opt == PopUpOptions.HideTime && !showTime) continue;
-            if (opt == PopUpOptions.DeleteLast && !deleteLast) continue;
-            if (opt == PopUpOptions.AmoledBlack && amoledBlack) continue;
-            if (opt == PopUpOptions.DefaultTheme && !amoledBlack) continue;
-            PopupMenuItem<PopUpOptions> entry = PopupMenuItem(
-              value: opt,
-              child: Text(k),
-            );
-            options.add(entry);
-          }
-          return options;
-        });
+  _showSettingsDialog(BuildContext context) async {
+    var res = await showDialog(
+        context: context,
+        builder: (context) => SettingsDialog(
+              amoled: amoledBlack,
+              canDelete: deleteLast,
+              showTime: showTime,
+            ));
+    if (res != null) {
+      callback(res);
+    }
   }
 }

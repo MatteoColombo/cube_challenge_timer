@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:progress_indicators/progress_indicators.dart';
+import 'package:cube_challenge_timer/generated/i18n.dart';
 
 class ScrambleWidget extends StatelessWidget {
   ScrambleWidget(
@@ -14,7 +15,7 @@ class ScrambleWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     if (scramble == null) {
       return FadingText(
-        "Generating scrambles...",
+        S.of(context).generating
       );
     }
     double fs = _getFontSize(MediaQuery.of(context).size.width);
