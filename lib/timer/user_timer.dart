@@ -19,7 +19,7 @@ class UserTimer extends StatefulWidget {
   UserTimerState createState() => UserTimerState(status, info, callback);
 }
 
-class UserTimerState extends State<UserTimer> {
+class UserTimerState extends State<UserTimer> with WidgetsBindingObserver {
   final PlayerStatus _status;
   TimerInfo _info;
   final Function _timerStateCallback;
@@ -29,10 +29,36 @@ class UserTimerState extends State<UserTimer> {
   int _runningTime;
 
   bool _parent;
+  bool _appVisible;
 
   UserTimerState(this._status, this._info, this._timerStateCallback)
       : _runningTime = 0,
-        _parent = true;
+        _parent = true,
+        _appVisible = true {
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      setState(() {
+        _appVisible = false;
+      });
+    } else if (state == AppLifecycleState.resumed) {
+      setState(() {
+        _appVisible = true;
+      });
+      if (_status.isTiming && _info.showTime) {
+        _updateTimeWhenTiming();
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,29 +134,30 @@ class UserTimerState extends State<UserTimer> {
   }
 
   _handleTapDown() {
-    if(_parent){
-    if (_info.scramble != null) {
-      if (_status.isTiming) {
-        _end = DateTime.now().millisecondsSinceEpoch;
-        if (_end - _start > 100) {
+    if (_parent) {
+      if (_info.scramble != null) {
+        if (_status.isTiming) {
+          _end = DateTime.now().millisecondsSinceEpoch;
+          if (_end - _start > 100) {
+            setState(() {
+              _status.setFinished = _end - _start;
+              _timerStateCallback(TimerState.Finished);
+            });
+          }
+        } else {
           setState(() {
-            _status.setFinished = _end - _start;
-            _timerStateCallback(TimerState.Finished);
+            _status.setReady();
+            _timerStateCallback(TimerState.Ready);
           });
         }
-      } else {
-        setState(() {
-          _status.setReady();
-          _timerStateCallback(TimerState.Ready);
-        });
       }
-    }
     }
   }
 
+  //TODO make this to update time only when app in in foreground
   _updateTimeWhenTiming() {
     Timer.periodic(Duration(milliseconds: 30), (Timer timer) {
-      if (_status.isTiming) {
+      if (_status.isTiming && _appVisible) {
         setState(() {
           _runningTime = DateTime.now().millisecondsSinceEpoch - _start;
         });
