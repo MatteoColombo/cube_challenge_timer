@@ -14,7 +14,7 @@ Scrambles are generated with TNoodle, the same software used in WCA official com
 
 # License (GNU GPL v3)
 
-    Copyright (C) 2016  Ariovaldo Neto
+    Copyright (C) 2019 Matteo Colombo
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
