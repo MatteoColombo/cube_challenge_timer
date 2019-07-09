@@ -29,7 +29,7 @@ class S implements WidgetsLocalizations {
   String get options => "Options";
   String get penalty => "+2";
   String get ready => "Ready";
-  String get reset => "Reset sessione";
+  String get reset => "Reset session";
   String get selectPuzzle => "Select puzzle";
   String get showTime => "Show time when solving";
   String get solving => "Solving";
