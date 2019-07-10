@@ -34,11 +34,6 @@ class PlayerStatus {
     _savePoints();
   }
 
-  _savePoints() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setInt('p$id', _points);
-  }
-
   bool get readyToStart => isReady && !canStart;
 
   bool get notTimingCanStart => !canStart && !isTiming && time != 0;
@@ -84,5 +79,10 @@ class PlayerStatus {
 
   void allowToStart() {
     key.currentState.allowToStart();
+  }
+
+  _savePoints() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt('p$id', _points);
   }
 }

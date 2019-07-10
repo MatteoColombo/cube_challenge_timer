@@ -1,6 +1,6 @@
 import 'package:cube_challenge_timer/enum/popup_menu.dart';
-import 'package:cube_challenge_timer/timer/results_widget.dart';
-import 'package:cube_challenge_timer/timer/settings_dialog.dart';
+import 'package:cube_challenge_timer/bar/results_widget.dart';
+import 'package:cube_challenge_timer/dialog/settings_dialog.dart';
 import 'package:flutter/material.dart';
 
 class MiddleBarWidget extends StatelessWidget {

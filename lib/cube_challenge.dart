@@ -4,8 +4,8 @@ import 'package:cube_challenge_timer/enum/timer_state.dart';
 import 'package:cube_challenge_timer/model/player_status.dart';
 import 'package:cube_challenge_timer/model/timer_info.dart';
 import 'package:cube_challenge_timer/scrambler/scrambler.dart';
-import 'package:cube_challenge_timer/timer/puzzle_selector.dart';
-import 'package:cube_challenge_timer/timer/middle_bar_widget.dart';
+import 'package:cube_challenge_timer/dialog/puzzle_selector.dart';
+import 'package:cube_challenge_timer/bar/middle_bar_widget.dart';
 import 'package:cube_challenge_timer/timer/user_timer.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -39,34 +39,31 @@ class CubeChallengeState extends State<CubeChallengeTimer> {
 
   @override
   Widget build(BuildContext context) {
-    return MediaQuery(
-      data: MediaQuery.of(context).copyWith(textScaleFactor: 1),
-      child: SafeArea(
-        child: Scaffold(
-          backgroundColor: _amoledBlack ?? false ? Colors.black : null,
-          body: Column(
-            children: <Widget>[
-              UserTimer(
-                  status: _p1, info: _info, callback: _playerTimerCallback),
-              Divider(
-                height: 1,
-              ),
-              MiddleBarWidget(
-                p0: _p0.points,
-                p1: _p1.points,
-                deleteLast: _p0.time != 0 && _p1.time != 0,
-                showTime: _info.showTime,
-                winner: _winner,
-                amoledBlack: _amoledBlack,
-                callback: _settingsCallback,
-              ),
-              Divider(
-                height: 1,
-              ),
-              UserTimer(
-                  status: _p0, info: _info, callback: _playerTimerCallback),
-            ],
-          ),
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: _amoledBlack ?? false ? Colors.black : null,
+        body: Column(
+          children: <Widget>[
+            UserTimer(
+                status: _p1, info: _info, callback: _playerTimerCallback),
+            Divider(
+              height: 1,
+            ),
+            MiddleBarWidget(
+              p0: _p0.points,
+              p1: _p1.points,
+              deleteLast: _p0.time != 0 && _p1.time != 0,
+              showTime: _info.showTime,
+              winner: _winner,
+              amoledBlack: _amoledBlack,
+              callback: _settingsCallback,
+            ),
+            Divider(
+              height: 1,
+            ),
+            UserTimer(
+                status: _p0, info: _info, callback: _playerTimerCallback),
+          ],
         ),
       ),
     );

@@ -1,4 +1,4 @@
-import 'package:cube_challenge_timer/timer/cube_challenge.dart';
+import 'package:cube_challenge_timer/cube_challenge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cube_challenge_timer/generated/i18n.dart';
@@ -7,7 +7,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIOverlays([]);
@@ -22,11 +21,10 @@ class MyApp extends StatelessWidget {
       title: '1vs1 Cube Timer',
       theme: ThemeData(
         brightness: Brightness.dark,
-        textTheme: TextTheme(
-          subhead: TextStyle(
-              fontSize: 16.0
-          ),
-        ),
+      ),
+      builder: (context, widget) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(textScaleFactor: 1),
+        child: widget,
       ),
       home: CubeChallengeTimer(),
     );
