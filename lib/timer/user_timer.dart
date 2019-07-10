@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:cube_challenge_timer/enum/penalty.dart';
 import 'package:cube_challenge_timer/enum/timer_state.dart';
 import 'package:cube_challenge_timer/model/player_status.dart';
@@ -19,46 +17,20 @@ class UserTimer extends StatefulWidget {
   UserTimerState createState() => UserTimerState(status, info, callback);
 }
 
-class UserTimerState extends State<UserTimer> with WidgetsBindingObserver {
+class UserTimerState extends State<UserTimer> {
   final PlayerStatus _status;
   TimerInfo _info;
   final Function _timerStateCallback;
 
   int _start;
   int _end;
-  int _runningTime;
+  final GlobalKey<TimeWidgetState> timeWidgetKey;
 
   bool _parent;
-  bool _appVisible;
 
   UserTimerState(this._status, this._info, this._timerStateCallback)
-      : _runningTime = 0,
-        _parent = true,
-        _appVisible = true {
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      setState(() {
-        _appVisible = false;
-      });
-    } else if (state == AppLifecycleState.resumed) {
-      setState(() {
-        _appVisible = true;
-      });
-      if (_status.isTiming && _info.showTime) {
-        _updateTimeWhenTiming();
-      }
-    }
-  }
+      : _parent = true,
+        timeWidgetKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -85,11 +57,12 @@ class UserTimerState extends State<UserTimer> with WidgetsBindingObserver {
                   scrambleSize: _info.scrambleSize,
                 ),
                 TimeWidget(
-                  time: _status.isTiming ? _runningTime : _status.time,
-                  timing: _status.isTiming,
-                  penalty: _status.penalty,
-                  timeSize: _info.timeSize,
+                  key: timeWidgetKey,
+                  isTiming: _status.isTiming,
                   showTime: _info.showTime,
+                  penalty: _status.penalty,
+                  start: _start,
+                  time: _status.time,
                 ),
                 Listener(
                   onPointerDown: _status.notTimingCanStart
@@ -123,7 +96,7 @@ class UserTimerState extends State<UserTimer> with WidgetsBindingObserver {
         _start = DateTime.now().millisecondsSinceEpoch;
         _status.startTiming();
         _timerStateCallback(TimerState.Timing);
-        if (_info.showTime) _updateTimeWhenTiming();
+        if (_info.showTime) timeWidgetKey.currentState.updateTimeWhenTiming();
         _status.penalty = Penalty.OK;
       });
     } else if (_status.isReady) {
@@ -152,19 +125,6 @@ class UserTimerState extends State<UserTimer> with WidgetsBindingObserver {
         }
       }
     }
-  }
-
-  //TODO make this to update time only when app in in foreground
-  _updateTimeWhenTiming() {
-    Timer.periodic(Duration(milliseconds: 30), (Timer timer) {
-      if (_status.isTiming && _appVisible) {
-        setState(() {
-          _runningTime = DateTime.now().millisecondsSinceEpoch - _start;
-        });
-      } else {
-        timer.cancel();
-      }
-    });
   }
 
   allowToStart() {
