@@ -3,10 +3,6 @@ import 'package:cube_challenge_timer/util/timeformatter.dart';
 
 void main() {
   group('Time Formatter', () {
-    test('Test time < 0', () {
-      final time = -123;
-      expect(formatTime(time), "DNF");
-    });
 
     test('Test time = 0', () {
       final time = 0;
